@@ -1,4 +1,6 @@
 const express = require('express');
+// import router from( './server/routes/api');
+const router = require('./server/routes/api');
 const app = express();
 const port = 3000;
 const mongoose = require('mongoose');
@@ -14,9 +16,9 @@ if (MONGO_URL) {
       console.log('error connecting to MongoDB:', error.message);
     });
 }
-app.get('/', (req, res) => {
-  res.send('Hello World!');
-});
+app.use(express.json());
+
+app.use('/api', router);
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);

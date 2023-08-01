@@ -2,7 +2,6 @@ const { CodeBlock } = require('../db/CodeBlock');
 
 exports.findAllCodeBlocks = async (req, res, next) => {
   try {
-    console.log('in');
     const codeBlock = await CodeBlock.find().select({ title: 1, name: 1 });
 
     res.send(codeBlock);
