@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const CodeBlockSchema = new mongoose.Schema()(
+const CodeBlockSchema = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -19,4 +19,4 @@ const CodeBlockSchema = new mongoose.Schema()(
 );
 
 const CodeBlock = mongoose.model('CodeBlock', CodeBlockSchema);
-export { CodeBlock };
+module.exports = { CodeBlock };
