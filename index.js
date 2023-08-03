@@ -1,49 +1,58 @@
+// index.js (file 1)
+
 require('dotenv').config();
 
 const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const http = require('http');
+const { Server } = require('socket.io');
 
 const router = require('./server/routes/api');
+const errorHandlerMiddleware = require('./server/middleware/errorHandler');
+const { onConnection } = require('./server/controller/socket');
+const { findOneAndUpdate } = require('./server/controller/codeblock');
 
 const app = express();
-
-const port = 3000;
-
-const mongoose = require('mongoose');
-
-const errorHandlerMiddleware = require('./server/middleware/errorHandler');
-
-const { Server, io } = require('socket.io');
-
-const http = require('http');
-
 const httpServer = http.createServer(app);
-
-exports.io = new Server(httpServer, {
+const io = new Server(httpServer, {
   cors: {
-    origin: ['http://localhost:3000'],
+    origin: 'http://localhost:3000',
   },
 });
 
-// io.on('connection', onConnection);
+app.use(cors({ origin: 'http://localhost:3000' }));
+app.use(express.json());
 
 const MONGO_URL = process.env.MONGO_URL;
-
-console.log(process.env.MONGO_URL);
 if (MONGO_URL) {
   mongoose
-    .connect(MONGO_URL) // connect to mongodb
+    .connect(MONGO_URL)
     .then(() => {
-      console.log(`connected to MongoDB `);
+      console.log('Connected to MongoDB.');
     })
     .catch(error => {
-      console.log('error connecting to MongoDB:', error.message);
+      console.error('Error connecting to MongoDB:', error.message);
     });
 }
-app.use(express.json());
+
+io.on('connection', socket => {
+  console.log('connection');
+
+  socket.on('update', async ({ content, id }) => {
+    findOneAndUpdate(id, content);
+    console.log(content);
+    io.emit('updateBack', { content });
+  });
+
+  socket.on('disconnect', () => {});
+});
 
 app.use('/api', router);
 app.use(errorHandlerMiddleware);
 
-exports.server = httpServer.listen(process.env.PORT || 3000, () => {
-  console.log(`appp listening at http://localhost:${process.env.PORT}`);
+exports.io = io;
+
+exports.server = httpServer.listen(process.env.PORT || 5000, () => {
+  console.log(`App listening at http://localhost:${process.env.PORT}`);
 });

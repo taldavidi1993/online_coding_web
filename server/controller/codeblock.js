@@ -21,6 +21,9 @@ exports.findOneCodeBlock = async (req, res, next) => {
   }
 };
 
+exports.findOneAndUpdate = async (id, content) => {
+  await CodeBlock.findOneAndUpdate({ _id: id }, { content: content });
+};
 exports.changeCodeBlockName = async (req, res, next) => {
   try {
     const { id, newName } = req.body;
